@@ -3,7 +3,7 @@ package com.polydus.aoc18
 
 fun main(){
 
-    val day = Day2()
+    val day = Day3()
 
 }
 
