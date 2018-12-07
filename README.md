@@ -1,7 +1,6 @@
 # Advent of Code
 
-My entry for Advent of Code 2018 in Kotlin!
-
+My entry for Advent of Code 2018 in Kotlin! Click here to see the puzzles: https://adventofcode.com/2018 
 
 
 ### License

@@ -9,11 +9,20 @@ class Infi{
 
     //https://aoc.infi.nl/
 
-    val input = Files.lines(Paths.get("input/infi.txt")).toList()
+    val input = Files.lines(Paths.get("input/infi2.txt")).toList()
 
-    val map = Array(20) {Array<Pos?>(20) {null} }
+    val map = Array(input.size) {Array<Pos?>(input.size) {null} }
+
+    val shuffledMap = Array(input.size) {Array<Pos?>(input.size) {null} }
+
+    val dayTwo = true
 
     init {
+
+        dayTwo()
+    }
+
+    fun dayOne(){
 
         for(x in 0 until 20){
             for(y in 0 until 20){
@@ -83,7 +92,237 @@ class Infi{
             }
             print("\n")
         }
-        
+
+    }
+
+    fun dayTwo(){
+        var size = input.size
+
+        for(x in 0 until size){
+            for(y in 0 until size){
+                //map[x][y] = Pos(x, y, input[map.size - 1 - y][x])
+                shuffledMap[x][y] = Pos(x, y, input[map.size - 1 - y][x])
+            }
+        }
+
+        val openList = HashSet<Pos>()
+        val closedList = HashSet<Pos>()
+
+        val origin = shuffledMap[0][map.size - 1]!!
+        val target = shuffledMap[map.size - 1][0]!!
+
+        openList.add(origin)
+
+        origin.distToOrigin = 0
+        origin.distToTarget = origin.getDeltaTo(target)
+
+        var counter = 0
+
+        while(!openList.isEmpty()){
+            var tile = openList.elementAt(0)
+
+            for(t in openList){
+                if(t.pathCost < tile.pathCost) tile = t
+            }
+
+            println("new tile is $tile with steps: ${tile.stepsFromOrigin}")
+
+            if(step != tile.stepsFromOrigin){
+                println("need to shuffle, bc step is $step and tile's step is ${tile.stepsFromOrigin}")
+
+                val type = tile.type
+
+                if(step > tile.stepsFromOrigin){
+                    reverse(tile)
+                } else if(step < tile.stepsFromOrigin){
+                    setShuffle(step + 1, tile)
+                }
+
+                if(type != tile.type){
+                    println("type changed!!")
+
+                }
+
+            } else {
+                println("no need to shuffle")
+            }
+
+            if(tile == target) break
+
+
+            //setShuffle(step + 1)
+
+
+            openList.remove(tile)
+            closedList.add(tile)
+
+            val adjacents = getChoices(tile)
+
+            for(a in adjacents){
+                val newDistToOrigin = tile.distToOrigin + 1
+
+                //println("$newDistToOrigin ${a.distToOrigin}")
+
+                if(newDistToOrigin < a.distToOrigin){
+                    openList.remove(a)
+                    closedList.remove(a)
+                    //counter++
+                }
+                if(!openList.contains(a) && !closedList.contains(a)){
+                    a.distToOrigin = newDistToOrigin
+                    a.distToTarget = a.getDeltaTo(target)
+                    a.parent = tile
+
+                    a.stepsFromOrigin = tile.stepsFromOrigin + 1
+                    openList.add(a)
+
+                    //counter++
+
+
+                }
+            }
+        }
+
+        println("tiles count $counter. Step is $step")
+
+        val result = ArrayList<Pos>()
+
+        var tile: Pos? = target
+        while(tile?.parent != null){
+            result.add(tile)
+            tile = tile.parent
+        }
+
+        result.reverse()
+
+        //println(result.size)
+        //println(map.filter { it.parent != null}.size)
+
+        /*for(y in map.size - 1 downTo 0){
+            for(x in 0 until map.size){
+                if(x == 1 || y == (map.size - 1)){
+                    print("\u001B[36m")
+                } else {
+                    print("\u001B[0m")
+                }
+                print(shuffledMap[x][y]?.type)
+            }
+            print("\n")
+        }*/
+
+        //setShuffle(2)
+
+        for(y in map.size - 1 downTo 0){
+            for(x in 0 until map.size){
+                if(result.contains(shuffledMap[x][y])){
+                    print("\u001B[36m" + shuffledMap[x][y]?.type)
+
+                } else if(shuffledMap[x][y]!!.parent != null){
+                    print("\u001B[31m" + shuffledMap[x][y]?.type)
+
+                } else {
+                    print("\u001B[0m" + shuffledMap[x][y]?.type)
+                }
+            }
+            print("\n")
+        }
+
+        println("answer is ${result.size}")
+
+
+        /* for(y in map.size - 1 downTo 0){
+             for(x in 0 until map.size){
+                 if(x == 1) print("${map[x][y]?.type}|${shuffledMap[x][y]?.type}")
+             }
+             print("\n")
+         }*/
+
+        /*for(y in 19 downTo 0){
+            for(x in 0 until 20){
+                if(x == 1)print(shuffledMap[x][y]?.type)
+            }
+            print("\n")
+        }*/
+
+
+
+
+
+    }
+
+    var step = 0
+
+    fun setShuffle(steps: Int, currentPos: Pos){
+
+
+        for(i in step until step + steps){
+            var row = i % 2 == 0
+            var index = i % map.size
+
+            if(row){
+                index = map.size - index - 1
+
+                var last = shuffledMap[map.size - 1][index]!!.type
+
+                for(j in shuffledMap.size - 1 downTo 1){
+
+                    //if(shuffledMap[j][index] == currentPos){
+
+                    //}
+
+                    shuffledMap[j][index]!!.type = shuffledMap[j - 1][index]!!.type
+                }
+
+                shuffledMap[0][index]!!.type = last
+
+            } else {
+                var first = shuffledMap[index][0]!!.type
+
+                for(j in 0 until shuffledMap.size - 1){
+                    //println("set ${shuffledMap[index][j]!!.type} to ${shuffledMap[index][j + 1]!!.type}")
+                    shuffledMap[index][j]!!.type = shuffledMap[index][j + 1]!!.type
+                }
+
+                //println("set ${shuffledMap[index][map.size - 1]!!.type} to $first")
+                shuffledMap[index][map.size - 1]!!.type = first
+
+            }
+
+        }
+        step += steps
+    }
+
+
+
+    fun reverse(currentPos: Pos){
+        step--
+
+        var row = step % 2 == 0
+        var index = step % map.size
+
+        if(row){
+            index = map.size - index - 1
+            var first = shuffledMap[0][index]!!.type
+
+            for(j in 0 until shuffledMap.size - 1){
+                //println("set ${shuffledMap[index][j]!!.type} to ${shuffledMap[index][j + 1]!!.type}")
+                shuffledMap[j][index]!!.type = shuffledMap[j + 1][index]!!.type
+            }
+
+            //println("set ${shuffledMap[index][map.size - 1]!!.type} to $first")
+            shuffledMap[map.size - 1][index]!!.type = first
+
+
+        } else {
+            var last = shuffledMap[index][map.size - 1]!!.type
+
+            for(j in shuffledMap.size - 1 downTo 1){
+                shuffledMap[index][j]!!.type = shuffledMap[index][j - 1]!!.type
+            }
+
+            shuffledMap[index][0]!!.type = last
+        }
+
 
     }
 
@@ -151,7 +390,11 @@ class Infi{
 
         val result: Pos
         try {
-            result = map[x][y]!!
+            if(dayTwo){
+                result = shuffledMap[x][y]!!
+            } else {
+                result = map[x][y]!!
+            }
         } catch (e: Exception){
             return null
         }
@@ -189,7 +432,7 @@ class Infi{
 
 }
 
-class Pos(val x: Int, val y: Int, val type: Char){
+class Pos(val x: Int, val y: Int, var type: Char){
 
     var distToOrigin = -1
     var distToTarget = -1
@@ -198,8 +441,9 @@ class Pos(val x: Int, val y: Int, val type: Char){
         get() = distToOrigin + distToTarget
 
     var parent: Pos? = null
-    
-    
+
+    var stepsFromOrigin = 0
+
 
 
     fun getDeltaTo(destination: Pos): Int{
