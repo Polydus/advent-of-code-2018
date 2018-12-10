@@ -9,7 +9,7 @@ class Infi{
 
     //https://aoc.infi.nl/
 
-    val input = Files.lines(Paths.get("input/infi2.txt")).toList()
+    val input = Files.lines(Paths.get("input/infi.txt")).toList()
 
     val map = Array(input.size) {Array<Pos?>(input.size) {null} }
 
@@ -17,9 +17,11 @@ class Infi{
 
     val dayTwo = true
 
+
+
     init {
 
-        dayTwo()
+        //dayTwo()
     }
 
     fun dayOne(){
@@ -95,7 +97,7 @@ class Infi{
 
     }
 
-    fun dayTwo(){
+    fun dayTwo(): Boolean{
         var size = input.size
 
         for(x in 0 until size){
@@ -116,35 +118,87 @@ class Infi{
         origin.distToOrigin = 0
         origin.distToTarget = origin.getDeltaTo(target)
 
+        val list = ArrayList<Pos>()
         var counter = 0
+        var success = false
 
-        while(!openList.isEmpty()){
+        list.add(origin)
+
+        while(counter < 2000){
+            //println("step is $step")
+            counter++
+
+            var tile = list.last()
+
+            val adjacents = getChoices(tile)
+                .filterNot { list.contains(it) }
+                .sortedBy { it.getDeltaTo(target) }
+                //.shuffled()
+            if(adjacents.isEmpty()) break
+
+            var next = adjacents[0]
+            var alts = adjacents
+                .filter { it.getDeltaTo(target) == next.getDeltaTo(target) }
+                .shuffled()
+
+            if(alts.isNotEmpty()){
+                //println("alts size ${alts.size}")
+                if(Math.random() < 0.5f){
+                    next = alts.first()
+                }
+            }
+
+
+
+
+
+            next = setShuffle(next)
+            list.add(next)
+
+            if(next == target){
+                success = true
+                break
+            }
+
+            //var tile = openList.elementAt(0)
+        }
+
+        //setShuffle(target)
+        //setShuffle(target)
+
+        //println("step is $step")
+
+
+        /*while(!openList.isEmpty()){
             var tile = openList.elementAt(0)
 
             for(t in openList){
-                if(t.pathCost < tile.pathCost) tile = t
+                if(t.pathCost < tile.pathCost){
+                    tile = t
+                    println("tile is $tile")
+                }
             }
 
             println("new tile is $tile with steps: ${tile.stepsFromOrigin}")
 
             if(step != tile.stepsFromOrigin){
-                println("need to shuffle, bc step is $step and tile's step is ${tile.stepsFromOrigin}")
+                //println("need to shuffle, bc step is $step and tile's step is ${tile.stepsFromOrigin}")
 
                 val type = tile.type
 
                 if(step > tile.stepsFromOrigin){
-                    reverse(tile)
+                    //reverse(tile)
                 } else if(step < tile.stepsFromOrigin){
-                    setShuffle(step + 1, tile)
+                    //setShuffle(step + 1, tile)
                 }
 
                 if(type != tile.type){
-                    println("type changed!!")
+                    //println("type changed!!")
 
                 }
 
             } else {
-                println("no need to shuffle")
+                //println("no need to shuffle")
             }
 
             if(tile == target) break
@@ -181,9 +235,9 @@ class Infi{
 
                 }
             }
-        }
+        }*/
 
-        println("tiles count $counter. Step is $step")
+        //println("tiles count $counter. Step is $step")
 
         val result = ArrayList<Pos>()
 
@@ -214,7 +268,7 @@ class Infi{
 
         for(y in map.size - 1 downTo 0){
             for(x in 0 until map.size){
-                if(result.contains(shuffledMap[x][y])){
+                if(list.contains(shuffledMap[x][y])){
                     print("\u001B[36m" + shuffledMap[x][y]?.type)
 
                 } else if(shuffledMap[x][y]!!.parent != null){
@@ -224,40 +278,32 @@ class Infi{
                     print("\u001B[0m" + shuffledMap[x][y]?.type)
                 }
             }
-            print("\n")
+            print("\n\u001B[0m")
         }
 
-        println("answer is ${result.size}")
+        for(l in list){
+            //println("${l}")
+        }
 
+        //println("\nanswer is ${list.size - 1}")
 
-        /* for(y in map.size - 1 downTo 0){
-             for(x in 0 until map.size){
-                 if(x == 1) print("${map[x][y]?.type}|${shuffledMap[x][y]?.type}")
-             }
-             print("\n")
-         }*/
+        if(success){
+            println("success!!")
+        }
 
-        /*for(y in 19 downTo 0){
-            for(x in 0 until 20){
-                if(x == 1)print(shuffledMap[x][y]?.type)
-            }
-            print("\n")
-        }*/
-
-
-
-
-
+        return success
     }
 
     var step = 0
 
-    fun setShuffle(steps: Int, currentPos: Pos){
+    fun setShuffle(currentPos: Pos): Pos{
+        //step++
 
+        var result = currentPos
 
-        for(i in step until step + steps){
-            var row = i % 2 == 0
-            var index = i % map.size
+        //for(i in step until step + steps){
+            var row = step % 2 == 0
+            var index = step % map.size
 
             if(row){
                 index = map.size - index - 1
@@ -267,38 +313,74 @@ class Infi{
                 for(j in shuffledMap.size - 1 downTo 1){
 
                     //if(shuffledMap[j][index] == currentPos){
-
+                     //   result = shuffledMap[j - 1][index]!!
                     //}
 
                     shuffledMap[j][index]!!.type = shuffledMap[j - 1][index]!!.type
                 }
 
+                //if(shuffledMap[0][index]!! == currentPos){
+                //    result = shuffledMap[map.size - 1][index]!!
+                //}
+
                 shuffledMap[0][index]!!.type = last
+
+                if(currentPos.y == index){
+                    if(currentPos.x == map.size - 1){
+                        result = shuffledMap[0][currentPos.y]!!
+                    } else {
+                        result = shuffledMap[currentPos.x + 1][currentPos.y]!!
+                    }
+                }
 
             } else {
                 var first = shuffledMap[index][0]!!.type
 
                 for(j in 0 until shuffledMap.size - 1){
                     //println("set ${shuffledMap[index][j]!!.type} to ${shuffledMap[index][j + 1]!!.type}")
+
+
+                    if(shuffledMap[index][j] == result){
+                        result = shuffledMap[index][j + 1]!!
+                    }
+
                     shuffledMap[index][j]!!.type = shuffledMap[index][j + 1]!!.type
                 }
 
                 //println("set ${shuffledMap[index][map.size - 1]!!.type} to $first")
+                if(shuffledMap[index][map.size - 1] == result){
+                    result =  shuffledMap[index][0]!!
+                }
                 shuffledMap[index][map.size - 1]!!.type = first
+
+
+
+                if(currentPos.x == index){
+                    if(currentPos.y == 0){
+                        result = shuffledMap[currentPos.x][map.size - 1]!!
+                    } else {
+                        result = shuffledMap[currentPos.x][currentPos.y - 1]!!
+                    }
+                }
 
             }
 
-        }
-        step += steps
+        //}
+        //step += steps
+        step++
+
+        return result
     }
 
 
 
-    fun reverse(currentPos: Pos){
+    fun reverse(currentPos: Pos): Pos{
         step--
 
         var row = step % 2 == 0
         var index = step % map.size
+
+        var result = currentPos
 
         if(row){
             index = map.size - index - 1
@@ -306,10 +388,18 @@ class Infi{
 
             for(j in 0 until shuffledMap.size - 1){
                 //println("set ${shuffledMap[index][j]!!.type} to ${shuffledMap[index][j + 1]!!.type}")
+
+                if(shuffledMap[j][index] == result){
+                    result = shuffledMap[j + 1][index]!!
+                }
+
                 shuffledMap[j][index]!!.type = shuffledMap[j + 1][index]!!.type
             }
 
             //println("set ${shuffledMap[index][map.size - 1]!!.type} to $first")
+            if(shuffledMap[map.size - 1][index] == result){
+                result = shuffledMap[0][index]!!
+            }
             shuffledMap[map.size - 1][index]!!.type = first
 
 
@@ -317,13 +407,22 @@ class Infi{
             var last = shuffledMap[index][map.size - 1]!!.type
 
             for(j in shuffledMap.size - 1 downTo 1){
+
+                if(shuffledMap[index][j]!! == result){
+                    result = shuffledMap[index][j - 1]!!
+                }
+
                 shuffledMap[index][j]!!.type = shuffledMap[index][j - 1]!!.type
             }
 
+            if(shuffledMap[index][0]!! == result){
+                result = shuffledMap[index][map.size - 1]!!
+            }
             shuffledMap[index][0]!!.type = last
         }
 
 
+        return result
     }
 
     fun getChoices(pos: Pos): List<Pos>{
