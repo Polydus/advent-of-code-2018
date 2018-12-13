@@ -3,7 +3,7 @@ package com.polydus.aoc18
 fun main(){
 
 
-    var day = Day10()
+    var day = Day11()
 
 }
 
