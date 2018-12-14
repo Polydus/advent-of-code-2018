@@ -15,8 +15,8 @@ class Day12: Day(12){
             states.add(input[i]!!.substring(9).toCharArray()[0])
         }
 
-        //partOne()
-        partTwo()
+        partOne()
+        //partTwo()
     }
 
     fun partOne(){
@@ -24,7 +24,7 @@ class Day12: Day(12){
 
         println(" ${0}: $initState")
 
-        for(i in 0 until 2020){
+        for(i in 0 until 20){
             var current = ".....$initState....."
             var result = ""
             startIndex += 3
@@ -60,11 +60,11 @@ class Day12: Day(12){
                 }
             }
             initState = result
-            try {
-                //println(" ${i + 1}: ${result.substring(firstPlant, lastPlant + 1)}")
-            } catch (e: Exception){
+            //try {
+                println(" ${i + 1}: ${result.substring(firstPlant, lastPlant + 1)}")
+            //} catch (e: Exception){
 
-            }
+            //}
         }
 
         val chars = initState.toCharArray()
