@@ -8,9 +8,6 @@ import kotlin.streams.toList
 
 abstract class Day(day: Int){
 
-    val input = Files.lines(Paths.get("input/day$day.txt")).toList()
+    val input = Files.lines(Paths.get("input/2018/day$day.txt")).toList()
 
-    init {
-
-    }
 }

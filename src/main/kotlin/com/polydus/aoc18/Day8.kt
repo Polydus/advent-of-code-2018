@@ -1,7 +1,5 @@
 package com.polydus.aoc18
 
-import com.sun.org.apache.xpath.internal.operations.Bool
-
 class Day8: Day(8){
 
     //https://adventofcode.com/2018/day/8
