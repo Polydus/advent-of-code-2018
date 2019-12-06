@@ -3,7 +3,7 @@ package com.polydus.aoc18
 
 fun main(){
 
-    val day = Day15()
+    val day = Infi()
 
 }
 

@@ -9,7 +9,7 @@ class Infi{
 
     //https://aoc.infi.nl/
 
-    val input = Files.lines(Paths.get("input/infi.txt")).toList()
+    val input = Files.lines(Paths.get("input/2018/infi.txt")).toList()
 
     val map = Array(input.size) {Array<Pos?>(input.size) {null} }
 
@@ -21,7 +21,8 @@ class Infi{
 
     init {
 
-        //dayTwo()
+        //dayOne()
+        dayTwo()
     }
 
     fun dayOne(){
